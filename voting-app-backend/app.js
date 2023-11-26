@@ -1,65 +1,69 @@
 const express = require('express');
-const { Gateway, Wallets, FileSystemWallet } = require('fabric-network');
-const path = require('path');
-const fs = require('fs');
-
 const app = express();
 app.use(express.json());
 
-const ccpPath = path.resolve(__dirname, '..', '..', 'first-network', 'connection-org1.json');
-const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
-const ccp = JSON.parse(ccpJSON);
+let voters = [];
+let votes = [];
+let candidates = [];
 
-async function connectToContract() {
-    const walletPath = path.join(process.cwd(), 'wallet');
-    const wallet = await Wallets.newFileSystemWallet(walletPath);
-
-    const gateway = new Gateway();
-    await gateway.connect(ccp, { wallet, identity: 'appUser', discovery: { enabled: true, asLocalhost: true } });
-
-    const network = await gateway.getNetwork('mychannel');
-    const contract = network.getContract('voting');
-
-    return { contract, gateway };
-}
-
-app.post('/registerVoter', async (req, res) => {
-    const { contract, gateway } = await connectToContract();
-    try {
-        await contract.submitTransaction('RegisterVoter', req.body.voterId, req.body.name);
-        res.json({ message: 'Voter registered successfully' });
-    } catch (error) {
-        res.status(500).send(error.toString());
-    } finally {
-        gateway.disconnect();
+// API to register voters
+app.post('/register', (req, res) => {
+    const { voterId, name } = req.body;
+    if (voters.find(v => v.voterId === voterId)) {
+        return res.status(400).send('Voter already registered.');
     }
+    voters.push({ voterId, name });
+    res.send('Voter registered successfully.');
 });
 
-app.post('/vote', async (req, res) => {
-    const { contract, gateway } = await connectToContract();
-    try {
-        await contract.submitTransaction('CastVote', req.body.voterId, req.body.candidateId);
-        res.json({ message: 'Vote cast successfully' });
-    } catch (error) {
-        res.status(500).send(error.toString());
-    } finally {
-        gateway.disconnect();
+// API to add candidates
+app.post('/addCandidate', (req, res) => {
+    const { candidateId, candidateName } = req.body;
+    if (candidates.find(c => c.candidateId === candidateId)) {
+        return res.status(400).send('Candidate already added.');
     }
+    candidates.push({ candidateId, candidateName });
+    res.send('Candidate added successfully.');
 });
 
-app.get('/results', async (req, res) => {
-    const { contract, gateway } = await connectToContract();
-    try {
-        const result = await contract.evaluateTransaction('GetResults');
-        res.json(JSON.parse(result.toString()));
-    } catch (error) {
-        res.status(500).send(error.toString());
-    } finally {
-        gateway.disconnect();
+// API to cast a vote
+app.post('/vote', (req, res) => {
+    const { voterId, candidateId } = req.body;
+    if (!voters.find(v => v.voterId === voterId)) {
+        return res.status(400).send('Voter not registered.');
     }
+    if (votes.find(v => v.voterId === voterId)) {
+        return res.status(400).send('Voter has already voted.');
+    }
+    if (!candidates.find(c => c.candidateId === candidateId)) {
+        return res.status(400).send('Invalid candidate ID.');
+    }
+    votes.push({ voterId, candidateId });
+    res.send('Vote cast successfully.');
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+// API to get candidate names
+app.get('/candidates', (req, res) => {
+    res.json(candidates);
+});
+
+// API to get results
+app.get('/results', (req, res) => {
+    const voteCounts = votes.reduce((acc, vote) => {
+        acc[vote.candidateId] = (acc[vote.candidateId] || 0) + 1;
+        return acc;
+    }, {});
+
+    const results = candidates.map(candidate => ({
+        candidateId: candidate.candidateId,
+        candidateName: candidate.candidateName,
+        votes: voteCounts[candidate.candidateId] || 0
+    }));
+
+    res.json(results);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
