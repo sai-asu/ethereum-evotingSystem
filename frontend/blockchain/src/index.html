@@ -2,18 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
   <title>US Govt Election Voting System</title>
   <style>
 
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Open Sans', Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background: url('src/US_map.png') no-repeat center center fixed;
+      background: url('src/US_map.png') no-repeat center center fixed, linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(220, 220, 220, 0.5));
       background-size: cover;
       text-align: center;
       color: white;
     }
+
+
     header {
       background-color: rgba(255, 255, 255, 0.8);
       padding: 10px 0;
@@ -77,6 +81,7 @@
     .option-button:hover {
       transform: scale(1.05); /* Slightly enlarge on hover */
     }
+
     .overlay {
       display: none;
       position: fixed;
@@ -95,7 +100,8 @@
       padding: 20px;
       border: 1px solid #888;
       width: 80%;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
       z-index: 3;
       text-align: left;
     }
@@ -168,7 +174,7 @@
 <div class="welcome-section">
   <h1> Welcome to E-Voting System for 2024 Elections! </h1>
 <!--  <button class="option-button" onclick="toggleSection('voter-registration')">Register</button>-->
-  <button class="option-button" onclick="openModal('voter-registration-modal')">Voter Registration</button>
+  <button class="option-button"  onclick="openModal('voter-registration-modal')">Voter Registration</button>
   <button class="option-button"  onclick="openModal('voting-modal')">Cast Vote</button>
   <button class="option-button"  onclick="openModal('election-results-modal')">View results</button>
 
@@ -241,6 +247,65 @@
     document.getElementById(modalId).style.display = 'none';
   }
   // Implement AJAX requests and form handling here
-</script>
+
+    document.getElementById('registerVoterForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const voterId = document.getElementById('voterId').value;
+    const voterName = document.getElementById('voterName').value;
+
+    fetch('/api/registerVoter', {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json',
+  },
+    body: JSON.stringify({ voterId, voterName }),
+  })
+    .then(response => response.json())
+    .then(data => {
+    console.log('Success:', data);
+    // Handle success (e.g., display a success message)
+  })
+    .catch((error) => {
+    console.error('Error:', error);
+    // Handle errors (e.g., display an error message)
+  });
+  });
+
+  //second
+    document.getElementById('voteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const candidateId = document.getElementById('candidateId').value;
+
+    fetch('/api/castVote', {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json',
+  },
+    body: JSON.stringify({ candidateId }),
+  })
+    // ... handle response and errors as above ...
+  });
+//third
+    function fetchElectionResults() {
+    fetch('/api/results')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Results:', data);
+        // Update the DOM to display the results
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Handle errors
+      });
+  }
+
+    // Example: If you have a button to view results
+    document.getElementById('viewResultsButton').addEventListener('click', fetchElectionResults);
+
+
+  </script>
+</div>
 </body>
 </html>
