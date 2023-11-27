@@ -11,10 +11,9 @@
       font-family: 'Open Sans', Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background: url('src/US_map.png') no-repeat center center fixed, linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(220, 220, 220, 0.5));
       background-size: cover;
       text-align: center;
-      color: white;
+      background-color: grey;
     }
 
 
@@ -176,7 +175,7 @@
 <!--  <button class="option-button" onclick="toggleSection('voter-registration')">Register</button>-->
   <button class="option-button"  onclick="openModal('voter-registration-modal')">Voter Registration</button>
   <button class="option-button"  onclick="openModal('voting-modal')">Cast Vote</button>
-  <button class="option-button"  onclick="openModal('election-results-modal')">View results</button>
+  <button class="option-button"  onclick="fetchElectionResults()">View results</button>
 
 <!--  <button class="option-button" onclick="toggleSection('voting')">Cast Vote</button>-->
 <!--  <button class="option-button" onclick="toggleSection('election-results')">View Results</button>-->
@@ -195,7 +194,7 @@
         <label for="voterName">Name:</label>
         <input type="text" id="voterName" name="voterName" required>
         <br>
-        <button type="submit">Register</button>
+        <button type="submit" onclick="registerVoter()">Register</button>
       </form>
     </div>
   </div>
@@ -208,14 +207,19 @@
       <span class="close-btn" onclick="closeModal('voting-modal')">&times;</span>
       <h2>Cast Your Vote</h2>
       <form id="voteForm">
+        <label for="voterId">Voter ID:</label>
+        <input type="text" id="voterId2" name="voterId" required>
+        <br>
         <label for="candidateId">Select Candidate:</label>
         <select id="candidateId" name="candidateId" required>
-          <option value="candidate1">Candidate 1</option>
-          <option value="candidate2">Candidate 2</option>
+          <option value="c1">Donald Trump</option>
+          <option value="c2">John F Kennedy</option>
+          <option value="c3">Joe Biden</option>
+          <option value="c4">George Bush</option>
           <!-- Add more candidates as options here -->
         </select>
         <br>
-        <button type="submit">Vote</button>
+        <button type="submit" onclick="vote()">Vote</button>
       </form>
     </div>
   </div>
@@ -248,52 +252,85 @@
   }
   // Implement AJAX requests and form handling here
 
-    document.getElementById('registerVoterForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+  function registerVoter() {
+    document.getElementById('registerVoterForm').addEventListener('submit', function (e) {
+      e.preventDefault();
 
-    const voterId = document.getElementById('voterId').value;
-    const voterName = document.getElementById('voterName').value;
+      const voterId = document.getElementById('voterId').value;
+      const name = document.getElementById('voterName').value;
 
-    fetch('/api/registerVoter', {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json',
-  },
-    body: JSON.stringify({ voterId, voterName }),
-  })
-    .then(response => response.json())
-    .then(data => {
-    console.log('Success:', data);
-    // Handle success (e.g., display a success message)
-  })
-    .catch((error) => {
-    console.error('Error:', error);
-    // Handle errors (e.g., display an error message)
-  });
-  });
+      fetch('http://localhost:3000/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({voterId, name}),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Success:', data);
+          // Handle success (e.g., display a success message)
+          closeModal('voter-registration-modal')
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          closeModal('voter-registration-modal')
+          // Handle errors (e.g., display an error message)
+        });
+    });
+  }
 
-  //second
-    document.getElementById('voteForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+  function vote() {
+    document.getElementById('voteForm').addEventListener('submit', function (e) {
+      e.preventDefault();
 
-    const candidateId = document.getElementById('candidateId').value;
+      const candidateId = document.getElementById('candidateId').value;
+      const voterId = document.getElementById('voterId2').value;
 
-    fetch('/api/castVote', {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json',
-  },
-    body: JSON.stringify({ candidateId }),
-  })
-    // ... handle response and errors as above ...
-  });
+      fetch('http://localhost:3000/vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({voterId, candidateId}),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Success:', data);
+          // Handle success (e.g., display a success message)
+          closeModal('voting-modal')
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          closeModal('voting-modal')
+          // Handle errors (e.g., display an error message)
+        });
+      // ... handle response and errors as above ...
+    });
+  }
+
+  function updateResultsModal(results) {
+    const resultsContainer = document.getElementById('results');
+    // Clear previous results
+    resultsContainer.innerHTML = '';
+
+    // Iterate over the results and create elements for each candidate
+    results.forEach(result => {
+      const resultElement = document.createElement('div');
+      resultElement.classList.add('result-item');
+      resultElement.innerHTML = `<strong>${result.candidateName}</strong>: ${result.votes} votes`;
+      resultsContainer.appendChild(resultElement);
+    });
+  }
 //third
     function fetchElectionResults() {
-    fetch('/api/results')
+    fetch('http://localhost:3000/results')
       .then(response => response.json())
       .then(data => {
         console.log('Results:', data);
         // Update the DOM to display the results
+        updateResultsModal(data);
+        openModal("election-results-modal")
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -301,10 +338,8 @@
       });
   }
 
-    // Example: If you have a button to view results
-    document.getElementById('viewResultsButton').addEventListener('click', fetchElectionResults);
 
-  </script>
+</script>
 </div>
 </body>
 </html>

@@ -1,6 +1,8 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 let voters = [];
 let votes = [];
@@ -13,6 +15,8 @@ app.post('/register', (req, res) => {
         return res.status(400).send('Voter already registered.');
     }
     voters.push({ voterId, name });
+    console.log("success")
+    console.log(voters)
     res.send('Voter registered successfully.');
 });
 
@@ -29,6 +33,7 @@ app.post('/addCandidate', (req, res) => {
 // API to cast a vote
 app.post('/vote', (req, res) => {
     const { voterId, candidateId } = req.body;
+    console.log(req.body)
     if (!voters.find(v => v.voterId === voterId)) {
         return res.status(400).send('Voter not registered.');
     }
@@ -39,6 +44,7 @@ app.post('/vote', (req, res) => {
         return res.status(400).send('Invalid candidate ID.');
     }
     votes.push({ voterId, candidateId });
+    console.log(votes)
     res.send('Vote cast successfully.');
 });
 
