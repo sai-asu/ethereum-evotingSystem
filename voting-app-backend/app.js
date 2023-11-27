@@ -3,6 +3,43 @@ const cors = require('cors');
 const app = express();
 app.use(express.json());
 app.use(cors());
+const { FileSystemWallet, Gateway, X509WalletMixin } = require('fabric-network');
+const path = require('path');
+const ccpPath = path.resolve(__dirname, 'connection.json'); // Path to the connection profile
+
+async function main() {
+    try {
+        // Setup Wallet
+        const wallet = new FileSystemWallet('./wallet');
+
+        // Check to see if we've already enrolled the user.
+        const userExists = await wallet.exists('user1');
+        if (!userExists) {
+            console.log('An identity for the user "user1" does not exist in the wallet');
+            return;
+        }
+
+        // Create a new gateway for connecting
+        const gateway = new Gateway();
+        await gateway.connect(ccpPath, { wallet, identity: 'user1', discovery: { enabled: false } });
+
+        // Get the network (channel)
+        const network = await gateway.getNetwork('mychannel');
+
+        // Get the contract from the network.
+        const contract = network.getContract('mychaincode');
+
+        // Submit the specified transaction.
+        // registerVoter transaction
+
+        // Disconnect from the gateway.
+        await gateway.disconnect();
+
+    } catch (error) {
+        console.error(`Failed to submit transaction: ${error}`);
+        process.exit(1);
+    }
+}
 
 let voters = [];
 let votes = [];
