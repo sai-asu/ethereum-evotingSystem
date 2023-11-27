@@ -2,57 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
   <title>US Govt Election Voting System</title>
   <style>
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Open Sans', Arial, sans-serif;
       margin: 0;
       padding: 0;
-      text-align: center;
-      color: black; /* Or any color you prefer */
-    }
-    .background-image-container {
-      background: url('/src/US_map.png') no-repeat center center;
+      background: url('src/US_map.png') no-repeat center center fixed, linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(220, 220, 220, 0.5));
       background-size: cover;
-      padding: 50px;
-      margin: 0 auto;
-      width: calc(100% - 100px);
-      min-height: 100vh;
-      box-sizing: border-box;
-      position: relative; /* Needed to position the button container */
-    }
-
-    .button-container {
-      position: absolute;
-      top: 50%; /* Center vertically */
-      left: 50%; /* Center horizontally */
-      transform: translate(-50%, -50%); /* Adjust for exact centering */
       text-align: center;
-    }
-
-    .option-button {
-      background-color: #004AAD;
       color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin: 10px;
-      font-size: 16px;
-      display: inline-block;
-      opacity: 0.9; /* Optional for better visibility */
-    }
-
-    .option-button:hover {
-      background-color: #003366;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-      color: black;
     }
 
 
@@ -61,9 +23,22 @@
       padding: 10px 0;
       border-bottom: 1px solid #ddd;
     }
-    .container, .welcome-section {
+    .button-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      width: 100%;
+      margin-top: 20px;
+      padding-left: calc(50%- 120px);
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh; /* Full height */
       width: 80%;
-      margin: 20px auto;
+      margin: 0 auto;
       overflow: hidden;
       background-color: rgba(255, 255, 255, 0.8);
       border-radius: 8px;
@@ -71,129 +46,265 @@
       color: black;
       padding: 20px;
     }
+    .welcome-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh; /* Ensure it covers at least the full viewport height */
+      padding: 20px; /* Add some padding */
+      box-sizing: border-box; /* Include padding in height calculation */
+    }
+
+    .welcome-section h1 {
+      font-size: 3em; /* Increase font size for visibility */
+      color: #004AAD; /* Change color for better contrast */
+      margin-bottom: 0.5em;
+    }
+
+
     .option-button {
-      background-color: #004AAD;
+      padding: 15px 30px; /* Increased padding for larger size */
+      font-size: 1.2em; /* Larger font size */
+      width: 200px;
+      height: 200px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    }
+    .option-button:nth-child(1) { background-color: #007BFF; } /* Blue */
+    .option-button:nth-child(2) { background-color: #28A745; } /* Green */
+    .option-button:nth-child(3) { background-color: #DC3545; } /* Red */
+
+    .option-button:hover {
+      transform: scale(1.05); /* Slightly enlarge on hover */
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: 2;
+      overflow: auto;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      z-index: 3;
+      text-align: left;
+    }
+    .modal-content form {
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Center form elements */
+    }
+
+    .modal-content label {
+      margin-top: 10px;
+      font-size: 1em;
+      color: #333; /* Darker color for better readability */
+    }
+    .modal-content input[type="text"],
+    .modal-content select {
+      width: 80%; /* Responsive width */
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .modal-content button {
+      background-color: #28A745; /* Green color */
       color: white;
-      padding: 10px 20px; /* Adjust padding as needed */
+      padding: 10px 20px;
+      margin-top: 15px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      margin: 10px;
-      font-size: 16px; /* Adjust font size as needed */
-      display: inline-block; /* To allow buttons to be smaller and align side-by-side */
+      transition: background-color 0.3s;
+    }
+    .modal-content button:hover {
+      background-color: #218838; /* Darker green on hover */
     }
 
-    .welcome-section button {
-      margin-top: 20px;
+    .close-btn {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
     }
 
-    .container {
-      text-align: center; /* Centering content inside the container */
+    .close-btn:hover,
+    .close-btn:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
     }
 
-    /* Optional: You can also add this for better control */
-    .container > section, .welcome-section {
-      display: inline-block;
-      width: auto; /* Adjust width as needed */
-      margin: 10px;
+    /* Additional Styling */
+    section {
+      display: none; /* Initially hidden */
+      width: 100%;
+      text-align: left;
       padding: 20px;
+      box-sizing: border-box;
     }
-
-    .option-button:hover {
-      background-color: #003366;
-    }
-    /* Rest of your existing CSS */
     label, input, select, button {
       display: block;
       width: 100%;
       margin-bottom: 10px;
     }
-    button {
-      background-color: #004AAD;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #003366;
-    }
-    .party-colors {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      margin: 0 5px;
-    }
-    .democrat {
-      background-color: #0015BC;
-    }
-    .republican {
-      background-color: #FF0000;
-    }
   </style>
 </head>
 <body>
-<header>
-  <div>
-    <span class="party-colors democrat"></span>
-    <span class="party-colors republican"></span>
-  </div>
-</header>
-
-<div class="background-image-container">
-  <div class="button-container">
-    <button class="option-button" onclick="showVoting()">Cast Your Vote</button>
-    <button class="option-button" onclick="showResults()">View Results</button>
-  </div>
-  <!-- Your other content goes here -->
-</div>
-
-
-
 
 
 <div class="welcome-section">
-  <h1>Welcome to E-Voting</h1>
-  <button class="option-button" onclick="showVoting()">Cast Your Vote</button>
-  <button class="option-button" onclick="showResults()">View Results</button>
+  <h1> Welcome to E-Voting System for 2024 Elections! </h1>
+<!--  <button class="option-button" onclick="toggleSection('voter-registration')">Register</button>-->
+  <button class="option-button"  onclick="openModal('voter-registration-modal')">Voter Registration</button>
+  <button class="option-button"  onclick="openModal('voting-modal')">Cast Vote</button>
+  <button class="option-button"  onclick="openModal('election-results-modal')">View results</button>
+
+<!--  <button class="option-button" onclick="toggleSection('voting')">Cast Vote</button>-->
+<!--  <button class="option-button" onclick="toggleSection('election-results')">View Results</button>-->
 </div>
 
-<div class="container" style="display: none;">
-  <h1>US Govt Election Voting System</h1>
+<div class="container">
+  <!-- Voter Registration Section -->
+  <div id="voter-registration-modal" class="overlay">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('voter-registration-modal')">&times;</span>
+      <h2>Register to Vote</h2>
+      <form id="registerVoterForm">
+        <label for="voterId">Voter ID:</label>
+        <input type="text" id="voterId" name="voterId" required>
+        <br>
+        <label for="voterName">Name:</label>
+        <input type="text" id="voterName" name="voterName" required>
+        <br>
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  </div>
 
-  <!-- Voter Registration -->
-  <section id="voter-registration">
-    <h2>Register to Vote</h2>
-    <form id="registerVoterForm">
-      <label for="voterId">Voter ID:</label>
-      <input type="text" id="voterId" name="voterId" required>
-      <br>
-      <label for="voterName">Name:</label>
-      <input type="text" id="voterName" name="voterName" required>
-      <br>
-      <button type="submit">Register</button>
-    </form>
-  </section>
 
-  <!-- Voting Section -->
-  <section id="voting">
-    <h2>Cast Your Vote</h2>
-    <form id="voteForm">
-      <label for="candidateId">Select Candidate:</label>
-      <select id="candidateId" name="candidateId" required>
-        <option value="candidate1">Candidate 1</option>
-        <option value="candidate2">Candidate 2</option>
-        <!-- Add more candidates as options here -->
-      </select>
-      <br>
-      <button type="submit">Vote</button>
-    </form>
-  </section>
 
-  <!-- Election Results -->
-  <section id="election-results">
-    <h2>Election Results</h2>
-    <button id="viewResults">View Results</button>
-    <div id="results">
+  <!-- Voting Section --><!-- Overlay for Voting -->
+  <div id="voting-modal" class="overlay">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('voting-modal')">&times;</span>
+      <h2>Cast Your Vote</h2>
+      <form id="voteForm">
+        <label for="candidateId">Select Candidate:</label>
+        <select id="candidateId" name="candidateId" required>
+          <option value="candidate1">Candidate 1</option>
+          <option value="candidate2">Candidate 2</option>
+          <!-- Add more candidates as options here -->
+        </select>
+        <br>
+        <button type="submit">Vote</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Overlay for Election Results -->
+  <div id="election-results-modal" class="overlay">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('election-results-modal')">&times;</span>
+      <h2>Election Results</h2>
+      <div id="results">
+        <!-- Results will be displayed here -->
+      </div>
+    </div>
+  </div>
+
+
+<script>
+  function toggleSection(sectionId) {
+    const sections = document.querySelectorAll('.container section');
+    sections.forEach(section => {
+      section.style.display = section.id === sectionId ? 'block' : 'none';
+    });
+  }
+    function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+  }
+
+    function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+  }
+  // Implement AJAX requests and form handling here
+
+    document.getElementById('registerVoterForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const voterId = document.getElementById('voterId').value;
+    const voterName = document.getElementById('voterName').value;
+
+    fetch('/api/registerVoter', {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json',
+  },
+    body: JSON.stringify({ voterId, voterName }),
+  })
+    .then(response => response.json())
+    .then(data => {
+    console.log('Success:', data);
+    // Handle success (e.g., display a success message)
+  })
+    .catch((error) => {
+    console.error('Error:', error);
+    // Handle errors (e.g., display an error message)
+  });
+  });
+
+  //second
+    document.getElementById('voteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const candidateId = document.getElementById('candidateId').value;
+
+    fetch('/api/castVote', {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json',
+  },
+    body: JSON.stringify({ candidateId }),
+  })
+    // ... handle response and errors as above ...
+  });
+//third
+    function fetchElectionResults() {
+    fetch('/api/results')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Results:', data);
+        // Update the DOM to display the results
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        // Handle errors
+      });
+  }
+
+    // Example: If you have a button to view results
+    document.getElementById('viewResultsButton').addEventListener('click', fetchElectionResults);
+
+  </script>
+</div>
+</body>
+</html>
